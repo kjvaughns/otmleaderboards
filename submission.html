@@ -55,6 +55,8 @@
     <div class="container">
         <div class="form-section">
             <h2>Submit New Report</h2>
+            <label for="week-start">Select Week Start (Monday):</label>
+            <input type="date" id="week-start" placeholder="Select Week Start" onchange="validateMonday()">
             <input type="text" id="name" placeholder="Name">
             <input type="number" id="alp-commits" placeholder="ALP Commits">
             <input type="number" id="calls" placeholder="Calls">
@@ -68,7 +70,22 @@
     <script>
         const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
 
+        function validateMonday() {
+            const weekStart = document.getElementById('week-start').value;
+            const date = new Date(weekStart);
+            const day = date.getUTCDay();
+            if (day !== 1) {
+                alert('Please select a Monday.');
+                document.getElementById('week-start').value = '';
+            }
+        }
+
         function submitReport() {
+            const weekStart = document.getElementById('week-start').value;
+            if (!weekStart) {
+                alert('Please select a valid week start date.');
+                return;
+            }
             const name = document.getElementById('name').value;
             const alpCommits = document.getElementById('alp-commits').value;
             const calls = document.getElementById('calls').value;
@@ -79,7 +96,7 @@
             const pnpNetAlp = alpCommits; // Assuming PNP Net ALP is based on ALP Commits
             const date = new Date().toISOString().split('T')[0];
 
-            leaderboard.push({ name, pnpNetAlp, hires, date });
+            leaderboard.push({ weekStart, name, pnpNetAlp, hires, date });
             localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
             alert('Report submitted successfully!');
         }
