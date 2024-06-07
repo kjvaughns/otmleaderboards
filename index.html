@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTM Leaderboards 2024</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            color: black;
+        }
+        header {
+            background-color: green;
+            color: white;
+            padding: 1em;
+            text-align: center;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            padding: 1em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1em;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 0.5em;
+            text-align: left;
+        }
+        th {
+            background-color: green;
+            color: white;
+        }
+        .filter-section, .form-section {
+            margin-bottom: 1em;
+        }
+        .form-section input {
+            margin-right: 0.5em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>OTM Leaderboards 2024</h1>
+    </header>
+    <div class="container">
+        <div class="filter-section">
+            <label for="date-filter">Filter by Date:</label>
+            <input type="month" id="date-filter" onchange="filterLeaderboard()">
+        </div>
+        <table id="leaderboard">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>PNP Net ALP</th>
+                    <th>Hires</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dynamic Content -->
+            </tbody>
+        </table>
+        <div class="form-section">
+            <h2>Add New Entry</h2>
+            <input type="text" id="name" placeholder="Name">
+            <input type="number" id="pnp-net-alp" placeholder="PNP Net ALP">
+            <input type="number" id="hires" placeholder="Hires">
+            <button onclick="addEntry()">Add</button>
+        </div>
+    </div>
+    <script>
+        const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+
+        function renderLeaderboard() {
+            const tbody = document.querySelector('#leaderboard tbody');
+            tbody.innerHTML = '';
+            leaderboard.forEach(entry => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${entry.name}</td>
+                    <td>${entry.pnpNetAlp}</td>
+                    <td>${entry.hires}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function addEntry() {
+            const name = document.getElementById('name').value;
+            const pnpNetAlp = document.getElementById('pnp-net-alp').value;
+            const hires = document.getElementById('hires').value;
+            const date = new Date().toISOString().split('T')[0];
+
+            leaderboard.push({ name, pnpNetAlp, hires, date });
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+            renderLeaderboard();
+        }
+
+        function filterLeaderboard() {
+            const filterDate = document.getElementById('date-filter').value;
+            const tbody = document.querySelector('#leaderboard tbody');
+            tbody.innerHTML = '';
+            leaderboard.forEach(entry => {
+                if (entry.date.startsWith(filterDate)) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${entry.name}</td>
+                        <td>${entry.pnpNetAlp}</td>
+                        <td>${entry.hires}</td>
+                    `;
+                    tbody.appendChild(row);
+                }
+            });
+        }
+
+        renderLeaderboard();
+    </script>
+</body>
+</html>
