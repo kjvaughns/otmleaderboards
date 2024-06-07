@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTM Leaderboards 2024 - Submission</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            color: black;
+        }
+        header {
+            background-color: green;
+            color: white;
+            padding: 1em;
+            text-align: center;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            padding: 1em;
+        }
+        .form-section {
+            margin-bottom: 1em;
+        }
+        .form-section input {
+            display: block;
+            margin: 0.5em 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>OTM Leaderboards 2024 - Submission</h1>
+    </header>
+    <div class="container">
+        <div class="form-section">
+            <h2>Submit New Report</h2>
+            <input type="text" id="name" placeholder="Name">
+            <input type="number" id="alp-commits" placeholder="ALP Commits">
+            <input type="number" id="calls" placeholder="Calls">
+            <input type="number" id="sits" placeholder="Sits">
+            <input type="number" id="sets" placeholder="Sets">
+            <input type="number" id="refs" placeholder="Refs">
+            <input type="number" id="hires" placeholder="Hires">
+            <button onclick="submitReport()">Submit</button>
+        </div>
+    </div>
+    <script>
+        const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+
+        function submitReport() {
+            const name = document.getElementById('name').value;
+            const alpCommits = document.getElementById('alp-commits').value;
+            const calls = document.getElementById('calls').value;
+            const sits = document.getElementById('sits').value;
+            const sets = document.getElementById('sets').value;
+            const refs = document.getElementById('refs').value;
+            const hires = document.getElementById('hires').value;
+            const pnpNetAlp = alpCommits; // Assuming PNP Net ALP is based on ALP Commits
+            const date = new Date().toISOString().split('T')[0];
+
+            leaderboard.push({ name, pnpNetAlp, hires, date });
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+            alert('Report submitted successfully!');
+        }
+    </script>
+</body>
+</html>
