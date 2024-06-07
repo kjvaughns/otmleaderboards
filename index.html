@@ -69,8 +69,8 @@
     </nav>
     <div class="container">
         <div class="filter-section">
-            <label for="date-filter">Filter by Date:</label>
-            <input type="month" id="date-filter" onchange="filterLeaderboard()">
+            <label for="week-start-filter">Filter by Week Start (Monday):</label>
+            <input type="date" id="week-start-filter" onchange="filterLeaderboard()">
         </div>
         <table id="leaderboard">
             <thead>
@@ -95,10 +95,10 @@
     <script>
         const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
 
-        function renderLeaderboard() {
+        function renderLeaderboard(entries) {
             const tbody = document.querySelector('#leaderboard tbody');
             tbody.innerHTML = '';
-            leaderboard.forEach(entry => {
+            entries.forEach(entry => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${entry.name}</td>
@@ -114,30 +114,23 @@
             const pnpNetAlp = document.getElementById('pnp-net-alp').value;
             const hires = document.getElementById('hires').value;
             const date = new Date().toISOString().split('T')[0];
+            const weekStart = new Date(date);
+            weekStart.setDate(weekStart.getDate() - weekStart.getUTCDay() + 1); // Adjust to Monday
 
-            leaderboard.push({ name, pnpNetAlp, hires, date });
+            leaderboard.push({ weekStart: weekStart.toISOString().split('T')[0], name, pnpNetAlp, hires, date });
             localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
-            renderLeaderboard();
+            renderLeaderboard(leaderboard);
         }
 
         function filterLeaderboard() {
-            const filterDate = document.getElementById('date-filter').value;
-            const tbody = document.querySelector('#leaderboard tbody');
-            tbody.innerHTML = '';
-            leaderboard.forEach(entry => {
-                if (entry.date.startsWith(filterDate)) {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${entry.name}</td>
-                        <td>${entry.pnpNetAlp}</td>
-                        <td>${entry.hires}</td>
-                    `;
-                    tbody.appendChild(row);
-                }
-            });
+            const filterDate = document.getElementById('week-start-filter').value;
+            if (!filterDate) return;
+
+            const filteredEntries = leaderboard.filter(entry => entry.weekStart === filterDate);
+            renderLeaderboard(filteredEntries);
         }
 
-        renderLeaderboard();
+        renderLeaderboard(leaderboard);
     </script>
 </body>
 </html>
