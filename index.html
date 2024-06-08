@@ -104,6 +104,8 @@
             </select>
             <input type="number" id="alp" placeholder="ALP">
             <input type="number" id="hires" placeholder="Hires">
+            <label for="entry-date">Date:</label>
+            <input type="date" id="entry-date">
             <button onclick="addEntry()">Add</button>
             <button onclick="addName()">Add Name</button>
             <input type="text" id="new-name" placeholder="New Name">
@@ -140,7 +142,7 @@
             const name = document.getElementById('name').value;
             const alp = document.getElementById('alp').value;
             const hires = document.getElementById('hires').value;
-            const date = new Date().toISOString().split('T')[0];
+            const date = document.getElementById('entry-date').value;
 
             leaderboard.push({ name, alp, hires, date });
             localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
@@ -161,6 +163,7 @@
             document.getElementById('name').value = entry.name;
             document.getElementById('alp').value = entry.alp;
             document.getElementById('hires').value = entry.hires;
+            document.getElementById('entry-date').value = entry.date;
             deleteEntry(index);
         }
 
