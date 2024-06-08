@@ -33,3 +33,96 @@
         .container {
             width: 80%;
             margin: auto;
+            padding: 1em;
+        }
+        .form-section {
+            margin-bottom: 1em;
+        }
+        .form-section input, .form-section select {
+            display: block;
+            margin: 0.5em 0;
+        }
+        .form-section button {
+            margin-top: 0.5em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>OTM Leaderboards 2024 - Submission</h1>
+    </header>
+    <nav>
+        <a href="index.html">Leaderboard</a>
+        <a href="submission.html">Submit Report</a>
+    </nav>
+    <div class="container">
+        <div class="form-section">
+            <h2>Submit New Report</h2>
+            <label for="name">Name:</label>
+            <select id="name">
+                <!-- Options will be dynamically filled -->
+            </select>
+            <label for="alp-commits">ALP Commits:</label>
+            <input type="number" id="alp-commits" placeholder="ALP Commits">
+            <label for="alp">ALP:</label>
+            <input type="number" id="alp" placeholder="ALP">
+            <label for="calls">Calls:</label>
+            <input type="number" id="calls" placeholder="Calls">
+            <label for="sits">Sits:</label>
+            <input type="number" id="sits" placeholder="Sits">
+            <label for="sets">Sets:</label>
+            <input type="number" id="sets" placeholder="Sets">
+            <label for="refs">Refs:</label>
+            <input type="number" id="refs" placeholder="Refs">
+            <label for="hires">Hires:</label>
+            <input type="number" id="hires" placeholder="Hires">
+            <label for="entry-date">Date:</label>
+            <input type="date" id="entry-date">
+            <button onclick="submitReport()">Submit</button>
+            <button onclick="addName()">Add Name</button>
+            <input type="text" id="new-name" placeholder="New Name">
+        </div>
+    </div>
+    <script>
+        const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+        const names = JSON.parse(localStorage.getItem('names')) || [];
+
+        function populateNames() {
+            const nameSelect = document.getElementById('name');
+            nameSelect.innerHTML = names.map(name => `<option value="${name}">${name}</option>`).join('');
+        }
+
+        function submitReport() {
+            const name = document.getElementById('name').value;
+            const alpCommits = document.getElementById('alp-commits').value;
+            const alp = document.getElementById('alp').value;
+            const calls = document.getElementById('calls').value;
+            const sits = document.getElementById('sits').value;
+            const sets = document.getElementById('sets').value;
+            const refs = document.getElementById('refs').value;
+            const hires = document.getElementById('hires').value;
+            const date = document.getElementById('entry-date').value;
+
+            if (!name || !alp || !hires || !date) {
+                alert('Please fill out all required fields.');
+                return;
+            }
+
+            leaderboard.push({ name, alp, hires, date });
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+            alert('Report submitted successfully!');
+        }
+
+        function addName() {
+            const newName = document.getElementById('new-name').value;
+            if (newName && !names.includes(newName)) {
+                names.push(newName);
+                localStorage.setItem('names', JSON.stringify(names));
+                populateNames();
+            }
+        }
+
+        populateNames();
+    </script>
+</body>
+</html>
