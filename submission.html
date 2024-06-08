@@ -95,18 +95,13 @@
         function submitReport() {
             const name = document.getElementById('name').value;
             const alpCommits = document.getElementById('alp-commits').value;
-            const alp = document.getElementById('alp').value;
+            const alp = parseInt(document.getElementById('alp').value, 10);
             const calls = document.getElementById('calls').value;
             const sits = document.getElementById('sits').value;
             const sets = document.getElementById('sets').value;
             const refs = document.getElementById('refs').value;
-            const hires = document.getElementById('hires').value;
+            const hires = parseInt(document.getElementById('hires').value, 10);
             const date = document.getElementById('entry-date').value;
-
-            if (!name || !alp || !hires || !date) {
-                alert('Please fill out all required fields.');
-                return;
-            }
 
             leaderboard.push({ name, alp, hires, date });
             localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
