@@ -46,6 +46,64 @@
             margin-top: 0.5em;
         }
     </style>
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD97-IFT9kT_rUmxX18JvFDwdr92D6JDYg",
+            authDomain: "otm-leaderboards.firebaseapp.com",
+            projectId: "otm-leaderboards",
+            storageBucket: "otm-leaderboards.appspot.com",
+            messagingSenderId: "591615125302",
+            appId: "1:591615125302:web:084d23c4c7002971a07597",
+            measurementId: "G-626YN37P2Z"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const namesCollection = collection(db, 'names');
+        const leaderboardCollection = collection(db, 'leaderboard');
+
+        async function populateNames() {
+            const nameSelect = document.getElementById('name');
+            const snapshot = await getDocs(namesCollection);
+            const names = snapshot.docs.map(doc => doc.data().name);
+            nameSelect.innerHTML = names.map(name => `<option value="${name}">${name}</option>`).join('');
+        }
+
+        async function submitReport() {
+            const name = document.getElementById('name').value;
+            const alpCommits = document.getElementById('alp-commits').value;
+            const alp = parseInt(document.getElementById('alp').value, 10);
+            const calls = document.getElementById('calls').value;
+            const sits = document.getElementById('sits').value;
+            const sets = document.getElementById('sets').value;
+            const refs = document.getElementById('refs').value;
+            const hires = parseInt(document.getElementById('hires').value, 10);
+            const date = document.getElementById('entry-date').value;
+
+            await addDoc(leaderboardCollection, { name, alp, hires, date });
+            alert('Report submitted successfully!');
+        }
+
+        async function addName() {
+            const newName = document.getElementById('new-name').value;
+            if (newName) {
+                await addDoc(namesCollection, { name: newName });
+                populateNames();
+            }
+        }
+
+        window.onload = function() {
+            populateNames();
+        }
+    </script>
 </head>
 <body>
     <header>
@@ -83,41 +141,5 @@
             <input type="text" id="new-name" placeholder="New Name">
         </div>
     </div>
-    <script>
-        const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-        const names = JSON.parse(localStorage.getItem('names')) || [];
-
-        function populateNames() {
-            const nameSelect = document.getElementById('name');
-            nameSelect.innerHTML = names.map(name => `<option value="${name}">${name}</option>`).join('');
-        }
-
-        function submitReport() {
-            const name = document.getElementById('name').value;
-            const alpCommits = document.getElementById('alp-commits').value;
-            const alp = parseInt(document.getElementById('alp').value, 10);
-            const calls = document.getElementById('calls').value;
-            const sits = document.getElementById('sits').value;
-            const sets = document.getElementById('sets').value;
-            const refs = document.getElementById('refs').value;
-            const hires = parseInt(document.getElementById('hires').value, 10);
-            const date = document.getElementById('entry-date').value;
-
-            leaderboard.push({ name, alp, hires, date });
-            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
-            alert('Report submitted successfully!');
-        }
-
-        function addName() {
-            const newName = document.getElementById('new-name').value;
-            if (newName && !names.includes(newName)) {
-                names.push(newName);
-                localStorage.setItem('names', JSON.stringify(names));
-                populateNames();
-            }
-        }
-
-        populateNames();
-    </script>
 </body>
 </html>
