@@ -42,6 +42,9 @@
             display: block;
             margin: 0.5em 0;
         }
+        .form-section button {
+            margin-top: 0.5em;
+        }
     </style>
 </head>
 <body>
@@ -55,8 +58,9 @@
     <div class="container">
         <div class="form-section">
             <h2>Submit New Report</h2>
-            <label for="week-start">Select Date Range:</label>
+            <label for="start-date">Start Date:</label>
             <input type="date" id="start-date" placeholder="Start Date">
+            <label for="end-date">End Date:</label>
             <input type="date" id="end-date" placeholder="End Date">
             <select id="name">
                 <!-- Options will be dynamically filled -->
@@ -69,40 +73,17 @@
             <input type="number" id="refs" placeholder="Refs">
             <input type="number" id="hires" placeholder="Hires">
             <button onclick="submitReport()">Submit</button>
+            <button onclick="addName()">Add Name</button>
+            <input type="text" id="new-name" placeholder="New Name">
         </div>
     </div>
     <script>
         const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+        const names = JSON.parse(localStorage.getItem('names')) || [];
 
         function populateNames() {
-            const names = [...new Set(leaderboard.map(entry => entry.name))];
             const nameSelect = document.getElementById('name');
             nameSelect.innerHTML = names.map(name => `<option value="${name}">${name}</option>`).join('');
         }
 
-        function submitReport() {
-            const startDate = document.getElementById('start-date').value;
-            const endDate = document.getElementById('end-date').value;
-            if (!startDate || !endDate) {
-                alert('Please select a valid date range.');
-                return;
-            }
-            const name = document.getElementById('name').value;
-            const alpCommits = document.getElementById('alp-commits').value;
-            const alp = document.getElementById('alp').value;
-            const calls = document.getElementById('calls').value;
-            const sits = document.getElementById('sits').value;
-            const sets = document.getElementById('sets').value;
-            const refs = document.getElementById('refs').value;
-            const hires = document.getElementById('hires').value;
-
-            leaderboard.push({ startDate, endDate, name, alp, hires, date: new Date().toISOString().split('T')[0] });
-            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
-            alert('Report submitted successfully!');
-            populateNames();
-        }
-
-        populateNames();
-    </script>
-</body>
-</html>
+        function
