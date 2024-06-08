@@ -82,11 +82,9 @@
     </style>
     <!-- Firebase SDK -->
     <script type="module">
-        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyD97-IFT9kT_rUmxX18JvFDwdr92D6JDYg",
             authDomain: "otm-leaderboards.firebaseapp.com",
@@ -97,11 +95,11 @@
             measurementId: "G-626YN37P2Z"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
         const namesCollection = collection(db, 'names');
+        const mgasCollection = collection(db, 'mgas');
         const leaderboardCollection = collection(db, 'leaderboard');
 
         let currentEditId = null;
@@ -115,6 +113,18 @@
                 console.log("Names populated successfully.");
             } catch (error) {
                 console.error("Error populating names:", error);
+            }
+        }
+
+        async function populateMGAs() {
+            try {
+                const mgaSelect = document.getElementById('mga');
+                const snapshot = await getDocs(mgasCollection);
+                const mgas = snapshot.docs.map(doc => doc.data().mga);
+                mgaSelect.innerHTML = mgas.map(mga => `<option value="${mga}">${mga}</option>`).join('');
+                console.log("MGAs populated successfully.");
+            } catch (error) {
+                console.error("Error populating MGAs:", error);
             }
         }
 
@@ -227,6 +237,7 @@
 
         window.addEventListener('load', () => {
             populateNames();
+            populateMGAs();
             renderLeaderboard();
             document.getElementById('add-entry-btn').addEventListener('click', addOrUpdateEntry);
         });
@@ -292,7 +303,10 @@
             <button id="add-entry-btn">Add or Update Entry</button>
             <h2>Add New Name</h2>
             <input type="text" id="new-name" placeholder="New Name">
-            <button id="add-name-btn">Add Name</button>
+            <button id="add-name-btn" onclick="addName()">Add Name</button>
+            <h2>Add New MGA</h2>
+            <input type="text" id="new-mga" placeholder="New MGA">
+            <button id="add-mga-btn" onclick="addMGA()">Add MGA</button>
         </div>
     </div>
 </body>
