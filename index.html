@@ -60,6 +60,25 @@
         .form-section button {
             margin-top: 0.5em;
         }
+        .medallion {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+            font-weight: bold;
+        }
+        .gold {
+            background-color: gold;
+        }
+        .silver {
+            background-color: silver;
+        }
+        .bronze {
+            background-color: #cd7f32;
+        }
     </style>
 </head>
 <body>
@@ -83,10 +102,17 @@
             <label for="end-date">End Date:</label>
             <input type="date" id="end-date" onchange="filterLeaderboard()">
             <button onclick="filterLeaderboard()">Filter</button>
+            <br>
+            <label for="sort-type">Sort By:</label>
+            <select id="sort-type" onchange="filterLeaderboard()">
+                <option value="alp">ALP</option>
+                <option value="hires">Hires</option>
+            </select>
         </div>
         <table id="leaderboard">
             <thead>
                 <tr>
+                    <th>Rank</th>
                     <th>Name</th>
                     <th>ALP</th>
                     <th>Hires</th>
@@ -122,11 +148,13 @@
 
         function renderLeaderboard(entries) {
             const aggregatedEntries = aggregateEntries(entries);
+            const sortedEntries = sortEntries(aggregatedEntries);
             const tbody = document.querySelector('#leaderboard tbody');
             tbody.innerHTML = '';
-            aggregatedEntries.forEach((entry, index) => {
+            sortedEntries.forEach((entry, index) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
+                    <td>${getMedallion(index + 1)}</td>
                     <td>${entry.name}</td>
                     <td>${entry.alp}</td>
                     <td>${entry.hires}</td>
@@ -139,6 +167,18 @@
             });
         }
 
+        function getMedallion(rank) {
+            if (rank === 1) {
+                return '<div class="medallion gold">1</div>';
+            } else if (rank === 2) {
+                return '<div class="medallion silver">2</div>';
+            } else if (rank === 3) {
+                return '<div class="medallion bronze">3</div>';
+            } else {
+                return rank;
+            }
+        }
+
         function aggregateEntries(entries) {
             const aggregated = {};
             entries.forEach(entry => {
@@ -149,6 +189,11 @@
                 aggregated[entry.name].hires += parseInt(entry.hires, 10);
             });
             return Object.values(aggregated);
+        }
+
+        function sortEntries(entries) {
+            const sortType = document.getElementById('sort-type').value;
+            return entries.sort((a, b) => b[sortType] - a[sortType]);
         }
 
         function addEntry() {
@@ -213,21 +258,4 @@
             const startDateInput = document.getElementById('start-date');
             const endDateInput = document.getElementById('end-date');
 
-            if (filterType === 'day') {
-                startDateInput.type = 'date';
-                endDateInput.type = 'date';
-                endDateInput.style.display = 'inline';
-            } else if (filterType === 'week') {
-                startDateInput.type = 'date';
-                endDateInput.style.display = 'none';
-            } else if (filterType === 'month') {
-                startDateInput.type = 'month';
-                endDateInput.style.display = 'none';
-            }
-        }
-
-        renderLeaderboard(leaderboard);
-        populateNames();
-    </script>
-</body>
-</html>
+            if (filterType === 'day
