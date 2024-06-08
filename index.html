@@ -72,6 +72,12 @@
     </nav>
     <div class="container">
         <div class="filter-section">
+            <label for="filter-type">Filter By:</label>
+            <select id="filter-type" onchange="toggleDateInputs()">
+                <option value="day">Day</option>
+                <option value="week">Week</option>
+                <option value="month">Month</option>
+            </select>
             <label for="start-date">Start Date:</label>
             <input type="date" id="start-date" onchange="filterLeaderboard()">
             <label for="end-date">End Date:</label>
@@ -165,13 +171,43 @@
         }
 
         function filterLeaderboard() {
-            const startDate = document.getElementById('start-date').value;
-            const endDate = document.getElementById('end-date').value;
-            const filteredEntries = leaderboard.filter(entry => {
+            const filterType = document.getElementById('filter-type').value;
+            const startDate = new Date(document.getElementById('start-date').value);
+            const endDate = new Date(document.getElementById('end-date').value);
+
+            let filteredEntries = leaderboard.filter(entry => {
                 const entryDate = new Date(entry.date);
-                return (!startDate || entryDate >= new Date(startDate)) && (!endDate || entryDate <= new Date(endDate));
+                if (filterType === 'day') {
+                    return entryDate >= startDate && entryDate <= endDate;
+                } else if (filterType === 'week') {
+                    const weekStart = new Date(startDate);
+                    const weekEnd = new Date(startDate);
+                    weekEnd.setDate(weekEnd.getDate() + 6);
+                    return entryDate >= weekStart && entryDate <= weekEnd;
+                } else if (filterType === 'month') {
+                    return entryDate.getFullYear() === startDate.getFullYear() && entryDate.getMonth() === startDate.getMonth();
+                }
             });
+
             renderLeaderboard(filteredEntries);
+        }
+
+        function toggleDateInputs() {
+            const filterType = document.getElementById('filter-type').value;
+            const startDateInput = document.getElementById('start-date');
+            const endDateInput = document.getElementById('end-date');
+
+            if (filterType === 'day') {
+                startDateInput.type = 'date';
+                endDateInput.type = 'date';
+                endDateInput.style.display = 'inline';
+            } else if (filterType === 'week') {
+                startDateInput.type = 'date';
+                endDateInput.style.display = 'none';
+            } else if (filterType === 'month') {
+                startDateInput.type = 'month';
+                endDateInput.style.display = 'none';
+            }
         }
 
         renderLeaderboard(leaderboard);
