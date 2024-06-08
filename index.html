@@ -210,10 +210,12 @@
             }
         }
 
-        window.onload = function() {
+        window.addEventListener('load', () => {
             populateNames();
             renderLeaderboard();
-        }
+            document.getElementById('add-name-btn').addEventListener('click', addName);
+            document.getElementById('add-entry-btn').addEventListener('click', addEntry);
+        });
     </script>
 </head>
 <body>
@@ -267,10 +269,10 @@
             <input type="number" id="hires" placeholder="Hires">
             <label for="entry-date">Date:</label>
             <input type="date" id="entry-date">
-            <button onclick="addEntry()">Add</button>
+            <button id="add-entry-btn">Add Entry</button>
             <h2>Add New Name</h2>
             <input type="text" id="new-name" placeholder="New Name">
-            <button onclick="addName()">Add Name</button>
+            <button id="add-name-btn">Add Name</button>
         </div>
     </div>
 </body>
