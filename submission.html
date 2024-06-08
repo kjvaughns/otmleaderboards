@@ -67,13 +67,11 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const namesCollection = collection(db, 'names');
-        const leaderboardCollection = collection(db, 'leaderboard');
-
+        // Function to populate names
         async function populateNames() {
             try {
                 const nameSelect = document.getElementById('name');
-                const snapshot = await getDocs(namesCollection);
+                const snapshot = await getDocs(collection(db, 'names'));
                 const names = snapshot.docs.map(doc => doc.data().name);
                 nameSelect.innerHTML = names.map(name => `<option value="${name}">${name}</option>`).join('');
                 console.log("Names populated successfully.");
@@ -82,6 +80,7 @@
             }
         }
 
+        // Function to submit a report
         async function submitReport() {
             try {
                 const name = document.getElementById('name').value;
@@ -94,7 +93,7 @@
                 const hires = parseInt(document.getElementById('hires').value, 10);
                 const date = document.getElementById('entry-date').value;
 
-                await addDoc(leaderboardCollection, { name, alp, hires, date });
+                await addDoc(collection(db, 'leaderboard'), { name, alp, hires, date });
                 alert('Report submitted successfully!');
                 console.log("Report submitted successfully.");
             } catch (error) {
@@ -102,11 +101,12 @@
             }
         }
 
+        // Function to add a new name
         async function addName() {
             try {
                 const newName = document.getElementById('new-name').value;
                 if (newName) {
-                    await addDoc(namesCollection, { name: newName });
+                    await addDoc(collection(db, 'names'), { name: newName });
                     await populateNames();
                     document.getElementById('new-name').value = ''; // Clear the input field
                     console.log("Name added successfully.");
@@ -116,9 +116,11 @@
             }
         }
 
-        window.onload = function() {
+        window.addEventListener('load', () => {
             populateNames();
-        }
+            document.getElementById('add-name-btn').addEventListener('click', addName);
+            document.getElementById('submit-report-btn').addEventListener('click', submitReport);
+        });
     </script>
 </head>
 <body>
@@ -152,10 +154,10 @@
             <input type="number" id="hires" placeholder="Hires">
             <label for="entry-date">Date:</label>
             <input type="date" id="entry-date">
-            <button onclick="submitReport()">Submit</button>
+            <button id="submit-report-btn">Submit</button>
             <h2>Add New Name</h2>
             <input type="text" id="new-name" placeholder="New Name">
-            <button onclick="addName()">Add Name</button>
+            <button id="add-name-btn">Add Name</button>
         </div>
     </div>
 </body>
