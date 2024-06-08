@@ -121,9 +121,10 @@
         }
 
         function renderLeaderboard(entries) {
+            const aggregatedEntries = aggregateEntries(entries);
             const tbody = document.querySelector('#leaderboard tbody');
             tbody.innerHTML = '';
-            entries.forEach((entry, index) => {
+            aggregatedEntries.forEach((entry, index) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${entry.name}</td>
@@ -136,6 +137,18 @@
                 `;
                 tbody.appendChild(row);
             });
+        }
+
+        function aggregateEntries(entries) {
+            const aggregated = {};
+            entries.forEach(entry => {
+                if (!aggregated[entry.name]) {
+                    aggregated[entry.name] = { name: entry.name, alp: 0, hires: 0 };
+                }
+                aggregated[entry.name].alp += parseInt(entry.alp, 10);
+                aggregated[entry.name].hires += parseInt(entry.hires, 10);
+            });
+            return Object.values(aggregated);
         }
 
         function addEntry() {
