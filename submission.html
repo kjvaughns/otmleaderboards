@@ -101,18 +101,17 @@
         async function populateMGAs() {
             try {
                 const mgaSelect = document.getElementById('mga');
-                const mgaFilterSelect = document.getElementById('mga-filter');
                 const snapshot = await getDocs(mgasCollection);
                 const mgas = snapshot.docs.map(doc => doc.data().mga);
                 mgaSelect.innerHTML = mgas.map(mga => `<option value="${mga}">${mga}</option>`).join('');
-                mgaFilterSelect.innerHTML = mgas.map(mga => `<option value="${mga}">${mga}</option>`).join('');
                 console.log("MGAs populated successfully.");
             } catch (error) {
                 console.error("Error populating MGAs:", error);
             }
         }
 
-        async function submitReport() {
+        async function submitReport(event) {
+            event.preventDefault();
             try {
                 const name = document.getElementById('name').value;
                 const mga = document.getElementById('mga').value;
@@ -134,13 +133,15 @@
                 }
 
                 renderSubmissions();
+                document.getElementById('submission-form').reset();
                 console.log("Report submitted successfully.");
             } catch (error) {
                 console.error("Error submitting report:", error);
             }
         }
 
-        async function addName() {
+        async function addName(event) {
+            event.preventDefault();
             try {
                 const newName = document.getElementById('new-name').value;
                 if (newName) {
@@ -154,7 +155,8 @@
             }
         }
 
-        async function addMGA() {
+        async function addMGA(event) {
+            event.preventDefault();
             try {
                 const newMGA = document.getElementById('new-mga').value;
                 if (newMGA) {
@@ -188,10 +190,9 @@
                     filteredEntries = filteredEntries.filter(entry => mgaFilter.includes(entry.mga));
                 }
 
-                const aggregatedEntries = aggregateEntries(filteredEntries);
                 const tbody = document.querySelector('#submission-table tbody');
                 tbody.innerHTML = '';
-                aggregatedEntries.forEach(entry => {
+                filteredEntries.forEach(entry => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${entry.name}</td>
@@ -204,7 +205,7 @@
                         <td>${entry.refs}</td>
                         <td>${entry.hires}</td>
                         <td>
-                            <button onclick="editSubmission('${entry.id}', '${entry.name}', '${entry.mga}', ${entry.alpCommits}, ${entry.alp}, ${entry.calls}, ${entry.sits}, ${entry.sets}, ${entry.refs}, ${entry.hires}, '${entry.date}')">Edit</button>
+                            <button onclick="editSubmission('${entry.id}', '${entry.name}', '${entry.mga}', '${entry.alpCommits}', ${entry.alp}, ${entry.calls}, ${entry.sits}, ${entry.sets}, ${entry.refs}, ${entry.hires}, '${entry.date}')">Edit</button>
                             <button onclick="deleteSubmission('${entry.id}')">Delete</button>
                         </td>
                     `;
@@ -214,35 +215,6 @@
             } catch (error) {
                 console.error("Error rendering submissions:", error);
             }
-        }
-
-        function aggregateEntries(entries) {
-            const aggregated = {};
-            entries.forEach(entry => {
-                if (!aggregated[entry.name]) {
-                    aggregated[entry.name] = {
-                        id: entry.id,
-                        name: entry.name,
-                        mga: entry.mga,
-                        alpCommits: 0,
-                        alp: 0,
-                        calls: 0,
-                        sits: 0,
-                        sets: 0,
-                        refs: 0,
-                        hires: 0,
-                        date: entry.date
-                    };
-                }
-                aggregated[entry.name].alpCommits += parseInt(entry.alpCommits, 10);
-                aggregated[entry.name].alp += parseInt(entry.alp, 10);
-                aggregated[entry.name].calls += parseInt(entry.calls, 10);
-                aggregated[entry.name].sits += parseInt(entry.sits, 10);
-                aggregated[entry.name].sets += parseInt(entry.sets, 10);
-                aggregated[entry.name].refs += parseInt(entry.refs, 10);
-                aggregated[entry.name].hires += parseInt(entry.hires, 10);
-            });
-            return Object.values(aggregated);
         }
 
         function editSubmission(id, name, mga, alpCommits, alp, calls, sits, sets, refs, hires, date) {
@@ -291,37 +263,43 @@
     <div class="container">
         <div class="form-section">
             <h2>Submit New Report</h2>
-            <label for="name">Name:</label>
-            <select id="name">
-                <!-- Options will be dynamically filled -->
-            </select>
-            <label for="mga">MGA:</label>
-            <select id="mga">
-                <!-- Options will be dynamically filled -->
-            </select>
-            <label for="alp-commits">ALP Commits:</label>
-            <input type="number" id="alp-commits" placeholder="ALP Commits">
-            <label for="alp">ALP:</label>
-            <input type="number" id="alp" placeholder="ALP">
-            <label for="calls">Calls:</label>
-            <input type="number" id="calls" placeholder="Calls">
-            <label for="sits">Sits:</label>
-            <input type="number" id="sits" placeholder="Sits">
-            <label for="sets">Sets:</label>
-            <input type="number" id="sets" placeholder="Sets">
-            <label for="refs">Refs:</label>
-            <input type="number" id="refs" placeholder="Refs">
-            <label for="hires">Hires:</label>
-            <input type="number" id="hires" placeholder="Hires">
-            <label for="entry-date">Date:</label>
-            <input type="date" id="entry-date">
-            <button id="submit-report-btn">Submit</button>
+            <form id="submission-form">
+                <label for="name">Name:</label>
+                <select id="name">
+                    <!-- Options will be dynamically filled -->
+                </select>
+                <label for="mga">MGA:</label>
+                <select id="mga">
+                    <!-- Options will be dynamically filled -->
+                </select>
+                <label for="alp-commits">ALP Commits:</label>
+                <input type="number" id="alp-commits" placeholder="ALP Commits">
+                <label for="alp">ALP:</label>
+                <input type="number" id="alp" placeholder="ALP">
+                <label for="calls">Calls:</label>
+                <input type="number" id="calls" placeholder="Calls">
+                <label for="sits">Sits:</label>
+                <input type="number" id="sits" placeholder="Sits">
+                <label for="sets">Sets:</label>
+                <input type="number" id="sets" placeholder="Sets">
+                <label for="refs">Refs:</label>
+                <input type="number" id="refs" placeholder="Refs">
+                <label for="hires">Hires:</label>
+                <input type="number" id="hires" placeholder="Hires">
+                <label for="entry-date">Date:</label>
+                <input type="date" id="entry-date">
+                <button id="submit-report-btn">Submit</button>
+            </form>
             <h2>Add New Name</h2>
-            <input type="text" id="new-name" placeholder="New Name">
-            <button id="add-name-btn">Add Name</button>
+            <form>
+                <input type="text" id="new-name" placeholder="New Name">
+                <button id="add-name-btn">Add Name</button>
+            </form>
             <h2>Add New MGA</h2>
-            <input type="text" id="new-mga" placeholder="New MGA">
-            <button id="add-mga-btn">Add MGA</button>
+            <form>
+                <input type="text" id="new-mga" placeholder="New MGA">
+                <button id="add-mga-btn">Add MGA</button>
+            </form>
         </div>
         <div class="form-section">
             <h2>Submitted Reports</h2>
