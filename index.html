@@ -177,6 +177,7 @@
             if (newName) {
                 await addDoc(namesCollection, { name: newName });
                 populateNames();
+                document.getElementById('new-name').value = ''; // Clear the input field
             }
         }
 
@@ -243,8 +244,9 @@
             <label for="entry-date">Date:</label>
             <input type="date" id="entry-date">
             <button onclick="addEntry()">Add</button>
-            <button onclick="addName()">Add Name</button>
+            <h2>Add New Name</h2>
             <input type="text" id="new-name" placeholder="New Name">
+            <button onclick="addName()">Add Name</button>
         </div>
     </div>
 </body>
