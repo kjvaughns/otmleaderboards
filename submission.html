@@ -101,9 +101,11 @@
         async function populateMGAs() {
             try {
                 const mgaSelect = document.getElementById('mga');
+                const mgaFilterSelect = document.getElementById('mga-filter');
                 const snapshot = await getDocs(mgasCollection);
                 const mgas = snapshot.docs.map(doc => doc.data().mga);
                 mgaSelect.innerHTML = mgas.map(mga => `<option value="${mga}">${mga}</option>`).join('');
+                mgaFilterSelect.innerHTML = mgas.map(mga => `<option value="${mga}">${mga}</option>`).join('');
                 console.log("MGAs populated successfully.");
             } catch (error) {
                 console.error("Error populating MGAs:", error);
@@ -168,9 +170,25 @@
 
         async function renderSubmissions() {
             try {
+                const startDate = document.getElementById('submission-start-date').value;
+                const endDate = document.getElementById('submission-end-date').value;
+                const mgaFilter = Array.from(document.getElementById('submission-mga-filter').selectedOptions).map(option => option.value);
+
                 const snapshot = await getDocs(leaderboardCollection);
                 const entries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                const aggregatedEntries = aggregateEntries(entries);
+                let filteredEntries = entries;
+
+                if (startDate) {
+                    filteredEntries = filteredEntries.filter(entry => entry.date >= startDate);
+                }
+                if (endDate) {
+                    filteredEntries = filteredEntries.filter(entry => entry.date <= endDate);
+                }
+                if (mgaFilter.length > 0) {
+                    filteredEntries = filteredEntries.filter(entry => mgaFilter.includes(entry.mga));
+                }
+
+                const aggregatedEntries = aggregateEntries(filteredEntries);
                 const tbody = document.querySelector('#submission-table tbody');
                 tbody.innerHTML = '';
                 aggregatedEntries.forEach(entry => {
@@ -258,6 +276,7 @@
             document.getElementById('submit-report-btn').addEventListener('click', submitReport);
             document.getElementById('add-name-btn').addEventListener('click', addName);
             document.getElementById('add-mga-btn').addEventListener('click', addMGA);
+            document.getElementById('submission-filter-btn').addEventListener('click', renderSubmissions);
         });
     </script>
 </head>
@@ -310,7 +329,11 @@
             <input type="date" id="submission-start-date">
             <label for="submission-end-date">End Date:</label>
             <input type="date" id="submission-end-date">
-            <button onclick="renderSubmissions()">Filter</button>
+            <label for="submission-mga-filter">MGA Filter:</label>
+            <select id="submission-mga-filter" multiple>
+                <!-- Options will be dynamically filled -->
+            </select>
+            <button id="submission-filter-btn">Filter</button>
             <table id="submission-table">
                 <thead>
                     <tr>
