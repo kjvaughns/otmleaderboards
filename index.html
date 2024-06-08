@@ -105,32 +105,42 @@
         const leaderboardCollection = collection(db, 'leaderboard');
 
         async function populateNames() {
-            const nameSelect = document.getElementById('name');
-            const snapshot = await getDocs(namesCollection);
-            const names = snapshot.docs.map(doc => doc.data().name);
-            nameSelect.innerHTML = names.map(name => `<option value="${name}">${name}</option>`).join('');
+            try {
+                const nameSelect = document.getElementById('name');
+                const snapshot = await getDocs(namesCollection);
+                const names = snapshot.docs.map(doc => doc.data().name);
+                nameSelect.innerHTML = names.map(name => `<option value="${name}">${name}</option>`).join('');
+                console.log("Names populated successfully.");
+            } catch (error) {
+                console.error("Error populating names:", error);
+            }
         }
 
         async function renderLeaderboard() {
-            const snapshot = await getDocs(leaderboardCollection);
-            const entries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            const aggregatedEntries = aggregateEntries(entries);
-            const sortedEntries = sortEntries(aggregatedEntries);
-            const tbody = document.querySelector('#leaderboard tbody');
-            tbody.innerHTML = '';
-            sortedEntries.forEach((entry, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${getMedallion(index + 1)}</td>
-                    <td>${entry.name}</td>
-                    <td>$${entry.alp}</td>
-                    <td>${entry.hires}</td>
-                    <td>
-                        <button onclick="deleteEntry('${entry.id}')">Delete</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
+            try {
+                const snapshot = await getDocs(leaderboardCollection);
+                const entries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const aggregatedEntries = aggregateEntries(entries);
+                const sortedEntries = sortEntries(aggregatedEntries);
+                const tbody = document.querySelector('#leaderboard tbody');
+                tbody.innerHTML = '';
+                sortedEntries.forEach((entry, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${getMedallion(index + 1)}</td>
+                        <td>${entry.name}</td>
+                        <td>$${entry.alp}</td>
+                        <td>${entry.hires}</td>
+                        <td>
+                            <button onclick="deleteEntry('${entry.id}')">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                console.log("Leaderboard rendered successfully.");
+            } catch (error) {
+                console.error("Error rendering leaderboard:", error);
+            }
         }
 
         function getMedallion(rank) {
@@ -162,27 +172,42 @@
         }
 
         async function addEntry() {
-            const name = document.getElementById('name').value;
-            const alp = parseInt(document.getElementById('alp').value, 10);
-            const hires = parseInt(document.getElementById('hires').value, 10);
-            const date = document.getElementById('entry-date').value;
+            try {
+                const name = document.getElementById('name').value;
+                const alp = parseInt(document.getElementById('alp').value, 10);
+                const hires = parseInt(document.getElementById('hires').value, 10);
+                const date = document.getElementById('entry-date').value;
 
-            await addDoc(leaderboardCollection, { name, alp, hires, date });
-            renderLeaderboard();
+                await addDoc(leaderboardCollection, { name, alp, hires, date });
+                renderLeaderboard();
+                console.log("Entry added successfully.");
+            } catch (error) {
+                console.error("Error adding entry:", error);
+            }
         }
 
         async function addName() {
-            const newName = document.getElementById('new-name').value;
-            if (newName) {
-                await addDoc(namesCollection, { name: newName });
-                populateNames();
-                document.getElementById('new-name').value = ''; // Clear the input field
+            try {
+                const newName = document.getElementById('new-name').value;
+                if (newName) {
+                    await addDoc(namesCollection, { name: newName });
+                    await populateNames();
+                    document.getElementById('new-name').value = ''; // Clear the input field
+                    console.log("Name added successfully.");
+                }
+            } catch (error) {
+                console.error("Error adding name:", error);
             }
         }
 
         async function deleteEntry(id) {
-            await deleteDoc(doc(leaderboardCollection, id));
-            renderLeaderboard();
+            try {
+                await deleteDoc(doc(leaderboardCollection, id));
+                renderLeaderboard();
+                console.log("Entry deleted successfully.");
+            } catch (error) {
+                console.error("Error deleting entry:", error);
+            }
         }
 
         window.onload = function() {
@@ -250,4 +275,3 @@
     </div>
 </body>
 </html>
-
