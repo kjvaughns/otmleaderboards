@@ -54,7 +54,7 @@
         .filter-section, .form-section {
             margin-bottom: 1em;
         }
-        .form-section input {
+        .form-section input, .form-section select {
             margin-right: 0.5em;
         }
     </style>
@@ -69,14 +69,17 @@
     </nav>
     <div class="container">
         <div class="filter-section">
-            <label for="week-start-filter">Filter by Week Start (Monday):</label>
-            <input type="date" id="week-start-filter" onchange="filterLeaderboard()">
+            <label for="start-date">Start Date:</label>
+            <input type="date" id="start-date" onchange="filterLeaderboard()">
+            <label for="end-date">End Date:</label>
+            <input type="date" id="end-date" onchange="filterLeaderboard()">
+            <button onclick="filterLeaderboard()">Filter</button>
         </div>
         <table id="leaderboard">
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>PNP Net ALP</th>
+                    <th>PNP</th>
                     <th>Hires</th>
                 </tr>
             </thead>
@@ -86,14 +89,22 @@
         </table>
         <div class="form-section">
             <h2>Add New Entry</h2>
-            <input type="text" id="name" placeholder="Name">
-            <input type="number" id="pnp-net-alp" placeholder="PNP Net ALP">
+            <select id="name">
+                <!-- Options will be dynamically filled -->
+            </select>
+            <input type="number" id="pnp" placeholder="PNP">
             <input type="number" id="hires" placeholder="Hires">
             <button onclick="addEntry()">Add</button>
         </div>
     </div>
     <script>
         const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+
+        function populateNames() {
+            const names = [...new Set(leaderboard.map(entry => entry.name))];
+            const nameSelect = document.getElementById('name');
+            nameSelect.innerHTML = names.map(name => `<option value="${name}">${name}</option>`).join('');
+        }
 
         function renderLeaderboard(entries) {
             const tbody = document.querySelector('#leaderboard tbody');
@@ -102,7 +113,7 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${entry.name}</td>
-                    <td>${entry.pnpNetAlp}</td>
+                    <td>${entry.pnp}</td>
                     <td>${entry.hires}</td>
                 `;
                 tbody.appendChild(row);
@@ -111,26 +122,28 @@
 
         function addEntry() {
             const name = document.getElementById('name').value;
-            const pnpNetAlp = document.getElementById('pnp-net-alp').value;
+            const pnp = document.getElementById('pnp').value;
             const hires = document.getElementById('hires').value;
             const date = new Date().toISOString().split('T')[0];
-            const weekStart = new Date(date);
-            weekStart.setDate(weekStart.getDate() - weekStart.getUTCDay() + 1); // Adjust to Monday
 
-            leaderboard.push({ weekStart: weekStart.toISOString().split('T')[0], name, pnpNetAlp, hires, date });
+            leaderboard.push({ name, pnp, hires, date });
             localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
             renderLeaderboard(leaderboard);
+            populateNames();
         }
 
         function filterLeaderboard() {
-            const filterDate = document.getElementById('week-start-filter').value;
-            if (!filterDate) return;
-
-            const filteredEntries = leaderboard.filter(entry => entry.weekStart === filterDate);
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            const filteredEntries = leaderboard.filter(entry => {
+                const entryDate = new Date(entry.date);
+                return (!startDate || entryDate >= new Date(startDate)) && (!endDate || entryDate <= new Date(endDate));
+            });
             renderLeaderboard(filteredEntries);
         }
 
         renderLeaderboard(leaderboard);
+        populateNames();
     </script>
 </body>
 </html>
