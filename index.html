@@ -198,8 +198,8 @@
 
         function addEntry() {
             const name = document.getElementById('name').value;
-            const alp = document.getElementById('alp').value;
-            const hires = document.getElementById('hires').value;
+            const alp = parseInt(document.getElementById('alp').value, 10);
+            const hires = parseInt(document.getElementById('hires').value, 10);
             const date = document.getElementById('entry-date').value;
 
             leaderboard.push({ name, alp, hires, date });
@@ -258,4 +258,21 @@
             const startDateInput = document.getElementById('start-date');
             const endDateInput = document.getElementById('end-date');
 
-            if (filterType === 'day
+            if (filterType === 'day') {
+                startDateInput.type = 'date';
+                endDateInput.type = 'date';
+                endDateInput.style.display = 'inline';
+            } else if (filterType === 'week') {
+                startDateInput.type = 'date';
+                endDateInput.style.display = 'none';
+            } else if (filterType === 'month') {
+                startDateInput.type = 'month';
+                endDateInput.style.display = 'none';
+            }
+        }
+
+        renderLeaderboard(leaderboard);
+        populateNames();
+    </script>
+</body>
+</html>
