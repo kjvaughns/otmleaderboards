@@ -38,7 +38,7 @@
         .form-section {
             margin-bottom: 1em;
         }
-        .form-section input {
+        .form-section input, .form-section select {
             display: block;
             margin: 0.5em 0;
         }
@@ -55,10 +55,14 @@
     <div class="container">
         <div class="form-section">
             <h2>Submit New Report</h2>
-            <label for="week-start">Select Week Start (Monday):</label>
-            <input type="date" id="week-start" placeholder="Select Week Start" onchange="validateMonday()">
-            <input type="text" id="name" placeholder="Name">
+            <label for="week-start">Select Date Range:</label>
+            <input type="date" id="start-date" placeholder="Start Date">
+            <input type="date" id="end-date" placeholder="End Date">
+            <select id="name">
+                <!-- Options will be dynamically filled -->
+            </select>
             <input type="number" id="alp-commits" placeholder="ALP Commits">
+            <input type="number" id="alp" placeholder="ALP">
             <input type="number" id="calls" placeholder="Calls">
             <input type="number" id="sits" placeholder="Sits">
             <input type="number" id="sets" placeholder="Sets">
@@ -70,36 +74,35 @@
     <script>
         const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
 
-        function validateMonday() {
-            const weekStart = document.getElementById('week-start').value;
-            const date = new Date(weekStart);
-            const day = date.getUTCDay();
-            if (day !== 1) {
-                alert('Please select a Monday.');
-                document.getElementById('week-start').value = '';
-            }
+        function populateNames() {
+            const names = [...new Set(leaderboard.map(entry => entry.name))];
+            const nameSelect = document.getElementById('name');
+            nameSelect.innerHTML = names.map(name => `<option value="${name}">${name}</option>`).join('');
         }
 
         function submitReport() {
-            const weekStart = document.getElementById('week-start').value;
-            if (!weekStart) {
-                alert('Please select a valid week start date.');
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            if (!startDate || !endDate) {
+                alert('Please select a valid date range.');
                 return;
             }
             const name = document.getElementById('name').value;
             const alpCommits = document.getElementById('alp-commits').value;
+            const alp = document.getElementById('alp').value;
             const calls = document.getElementById('calls').value;
             const sits = document.getElementById('sits').value;
             const sets = document.getElementById('sets').value;
             const refs = document.getElementById('refs').value;
             const hires = document.getElementById('hires').value;
-            const pnpNetAlp = alpCommits; // Assuming PNP Net ALP is based on ALP Commits
-            const date = new Date().toISOString().split('T')[0];
 
-            leaderboard.push({ weekStart, name, pnpNetAlp, hires, date });
+            leaderboard.push({ startDate, endDate, name, alp, hires, date: new Date().toISOString().split('T')[0] });
             localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
             alert('Report submitted successfully!');
+            populateNames();
         }
+
+        populateNames();
     </script>
 </body>
 </html>
