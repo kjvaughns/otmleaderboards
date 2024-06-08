@@ -82,7 +82,7 @@
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>PNP</th>
+                    <th>ALP</th>
                     <th>Hires</th>
                     <th>Actions</th>
                 </tr>
@@ -96,7 +96,7 @@
             <select id="name">
                 <!-- Options will be dynamically filled -->
             </select>
-            <input type="number" id="alp" placeholder="PNP">
+            <input type="number" id="alp" placeholder="ALP">
             <input type="number" id="hires" placeholder="Hires">
             <button onclick="addEntry()">Add</button>
             <button onclick="addName()">Add Name</button>
@@ -153,7 +153,7 @@
         function editEntry(index) {
             const entry = leaderboard[index];
             document.getElementById('name').value = entry.name;
-            document.getElementById('alp').value = entry.pnp;
+            document.getElementById('alp').value = entry.alp;
             document.getElementById('hires').value = entry.hires;
             deleteEntry(index);
         }
