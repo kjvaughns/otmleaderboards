@@ -80,6 +80,116 @@
             background-color: #cd7f32;
         }
     </style>
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD97-IFT9kT_rUmxX18JvFDwdr92D6JDYg",
+            authDomain: "otm-leaderboards.firebaseapp.com",
+            projectId: "otm-leaderboards",
+            storageBucket: "otm-leaderboards.appspot.com",
+            messagingSenderId: "591615125302",
+            appId: "1:591615125302:web:084d23c4c7002971a07597",
+            measurementId: "G-626YN37P2Z"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const namesCollection = collection(db, 'names');
+        const leaderboardCollection = collection(db, 'leaderboard');
+
+        async function populateNames() {
+            const nameSelect = document.getElementById('name');
+            const snapshot = await getDocs(namesCollection);
+            const names = snapshot.docs.map(doc => doc.data().name);
+            nameSelect.innerHTML = names.map(name => `<option value="${name}">${name}</option>`).join('');
+        }
+
+        async function renderLeaderboard() {
+            const snapshot = await getDocs(leaderboardCollection);
+            const entries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const aggregatedEntries = aggregateEntries(entries);
+            const sortedEntries = sortEntries(aggregatedEntries);
+            const tbody = document.querySelector('#leaderboard tbody');
+            tbody.innerHTML = '';
+            sortedEntries.forEach((entry, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${getMedallion(index + 1)}</td>
+                    <td>${entry.name}</td>
+                    <td>$${entry.alp}</td>
+                    <td>${entry.hires}</td>
+                    <td>
+                        <button onclick="editEntry('${entry.id}')">Edit</button>
+                        <button onclick="deleteEntry('${entry.id}')">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function getMedallion(rank) {
+            if (rank === 1) {
+                return '<div class="medallion gold">1</div>';
+            } else if (rank === 2) {
+                return '<div class="medallion silver">2</div>';
+            } else if (rank === 3) {
+                return '<div class="medallion bronze">3</div>';
+            } else {
+                return rank;
+            }
+        }
+
+        function aggregateEntries(entries) {
+            const aggregated = {};
+            entries.forEach(entry => {
+                if (!aggregated[entry.name]) {
+                    aggregated[entry.name] = { name: entry.name, alp: 0, hires: 0 };
+                }
+                aggregated[entry.name].alp += parseInt(entry.alp, 10);
+                aggregated[entry.name].hires += parseInt(entry.hires, 10);
+            });
+            return Object.values(aggregated);
+        }
+
+        function sortEntries(entries) {
+            return entries.sort((a, b) => b.alp - a.alp || b.hires - a.hires);
+        }
+
+        async function addEntry() {
+            const name = document.getElementById('name').value;
+            const alp = parseInt(document.getElementById('alp').value, 10);
+            const hires = parseInt(document.getElementById('hires').value, 10);
+            const date = document.getElementById('entry-date').value;
+
+            await addDoc(leaderboardCollection, { name, alp, hires, date });
+            renderLeaderboard();
+        }
+
+        async function addName() {
+            const newName = document.getElementById('new-name').value;
+            if (newName) {
+                await addDoc(namesCollection, { name: newName });
+                populateNames();
+            }
+        }
+
+        async function deleteEntry(id) {
+            await deleteDoc(doc(leaderboardCollection, id));
+            renderLeaderboard();
+        }
+
+        window.onload = function() {
+            populateNames();
+            renderLeaderboard();
+        }
+    </script>
 </head>
 <body>
     <header>
@@ -137,142 +247,5 @@
             <input type="text" id="new-name" placeholder="New Name">
         </div>
     </div>
-    <script>
-        const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-        const names = JSON.parse(localStorage.getItem('names')) || [];
-
-        function populateNames() {
-            const nameSelect = document.getElementById('name');
-            nameSelect.innerHTML = names.map(name => `<option value="${name}">${name}</option>`).join('');
-        }
-
-        function renderLeaderboard(entries) {
-            const aggregatedEntries = aggregateEntries(entries);
-            const sortedEntries = sortEntries(aggregatedEntries);
-            const tbody = document.querySelector('#leaderboard tbody');
-            tbody.innerHTML = '';
-            sortedEntries.forEach((entry, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${getMedallion(index + 1)}</td>
-                    <td>${entry.name}</td>
-                    <td>${entry.alp}</td>
-                    <td>${entry.hires}</td>
-                    <td>
-                        <button onclick="editEntry(${index})">Edit</button>
-                        <button onclick="deleteEntry(${index})">Delete</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        function getMedallion(rank) {
-            if (rank === 1) {
-                return '<div class="medallion gold">1</div>';
-            } else if (rank === 2) {
-                return '<div class="medallion silver">2</div>';
-            } else if (rank === 3) {
-                return '<div class="medallion bronze">3</div>';
-            } else {
-                return rank;
-            }
-        }
-
-        function aggregateEntries(entries) {
-            const aggregated = {};
-            entries.forEach(entry => {
-                if (!aggregated[entry.name]) {
-                    aggregated[entry.name] = { name: entry.name, alp: 0, hires: 0 };
-                }
-                aggregated[entry.name].alp += parseInt(entry.alp, 10);
-                aggregated[entry.name].hires += parseInt(entry.hires, 10);
-            });
-            return Object.values(aggregated);
-        }
-
-        function sortEntries(entries) {
-            const sortType = document.getElementById('sort-type').value;
-            return entries.sort((a, b) => b[sortType] - a[sortType]);
-        }
-
-        function addEntry() {
-            const name = document.getElementById('name').value;
-            const alp = parseInt(document.getElementById('alp').value, 10);
-            const hires = parseInt(document.getElementById('hires').value, 10);
-            const date = document.getElementById('entry-date').value;
-
-            leaderboard.push({ name, alp, hires, date });
-            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
-            renderLeaderboard(leaderboard);
-        }
-
-        function addName() {
-            const newName = document.getElementById('new-name').value;
-            if (newName && !names.includes(newName)) {
-                names.push(newName);
-                localStorage.setItem('names', JSON.stringify(names));
-                populateNames();
-            }
-        }
-
-        function editEntry(index) {
-            const entry = leaderboard[index];
-            document.getElementById('name').value = entry.name;
-            document.getElementById('alp').value = entry.alp;
-            document.getElementById('hires').value = entry.hires;
-            document.getElementById('entry-date').value = entry.date;
-            deleteEntry(index);
-        }
-
-        function deleteEntry(index) {
-            leaderboard.splice(index, 1);
-            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
-            renderLeaderboard(leaderboard);
-        }
-
-        function filterLeaderboard() {
-            const filterType = document.getElementById('filter-type').value;
-            const startDate = new Date(document.getElementById('start-date').value);
-            const endDate = new Date(document.getElementById('end-date').value);
-
-            let filteredEntries = leaderboard.filter(entry => {
-                const entryDate = new Date(entry.date);
-                if (filterType === 'day') {
-                    return entryDate >= startDate && entryDate <= endDate;
-                } else if (filterType === 'week') {
-                    const weekStart = new Date(startDate);
-                    const weekEnd = new Date(startDate);
-                    weekEnd.setDate(weekEnd.getDate() + 6);
-                    return entryDate >= weekStart && entryDate <= weekEnd;
-                } else if (filterType === 'month') {
-                    return entryDate.getFullYear() === startDate.getFullYear() && entryDate.getMonth() === startDate.getMonth();
-                }
-            });
-
-            renderLeaderboard(filteredEntries);
-        }
-
-        function toggleDateInputs() {
-            const filterType = document.getElementById('filter-type').value;
-            const startDateInput = document.getElementById('start-date');
-            const endDateInput = document.getElementById('end-date');
-
-            if (filterType === 'day') {
-                startDateInput.type = 'date';
-                endDateInput.type = 'date';
-                endDateInput.style.display = 'inline';
-            } else if (filterType === 'week') {
-                startDateInput.type = 'date';
-                endDateInput.style.display = 'none';
-            } else if (filterType === 'month') {
-                startDateInput.type = 'month';
-                endDateInput.style.display = 'none';
-            }
-        }
-
-        renderLeaderboard(leaderboard);
-        populateNames();
-    </script>
 </body>
 </html>
